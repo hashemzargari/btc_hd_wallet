@@ -42,10 +42,19 @@ def seed_from_mnemonic(mnemonic: list[str], salt: str = '') -> str:
     return str(binascii.hexlify(hashlib.pbkdf2_hmac('sha512', mnemonic_str.encode(), salt.encode(), 2048)).decode())
 
 
+def normal_child_private_key_from_data_key(data: str, key: str) -> (str, str):
+    string = str(hmac.new(data.encode(), key.encode(), hashlib.sha512).hexdigest())
+    return string[:int(len(string) / 2)], string[int(len(string) / 2):]
+
+
 def get_hd_from_private_key_chain(private_key: str, chain: str, as_dict: bool = False) -> HDKey or dict:
     if as_dict:
         return dict(HDKey(import_key=private_key, chain=chain.encode()).as_dict())
     return HDKey(import_key=private_key, chain=chain.encode())
+
+
+def get_hd_from_public_key_chain(public_key: str, chain: str, as_dict: bool = False) -> HDKey or dict:
+    pass  # TODO
 
 
 if __name__ == '__main__':
@@ -60,5 +69,5 @@ if __name__ == '__main__':
     print('master_private_key', master_private_key)
     print('chain_code', chain_code)
     print('HD', hd)
-
+    print('NORMAL 5', normal_child_private_key_from_data_key(master_private_key + '5', chain_code))
     print('done')
