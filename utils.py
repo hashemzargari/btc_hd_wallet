@@ -3,6 +3,7 @@ import random
 import secrets
 import hashlib
 import hmac
+import base58
 from consts import bip39_wordlist
 from bitcoinlib.keys import HDKey
 
@@ -57,17 +58,39 @@ def get_hd_from_public_key_chain(public_key: str, chain: str, as_dict: bool = Fa
     pass  # TODO
 
 
+def get_child_from_sub_derivation_path(parent, derivation: str):
+    derivation = derivation.split('h')
+    child = None
+    if len(derivation) > 1:  # hardened
+        child = parent.get_hardened_child(int(derivation[0]))
+    else:  # normal
+        child = parent.get_normal_child(int(derivation[0]))
+
+    return child
+
+
+def p2pkh_from_public_key(public_key: str, prefix: str = '00') -> str:
+    hash_ = hashlib.new('ripemd160', hashlib.sha256(public_key.encode()).digest()).hexdigest()
+    result = hashlib.sha256(hash_.encode()).hexdigest()
+    check_some = "{0:08b}".format(int(result, 16))
+    check_some = check_some[:8]
+    result = prefix + hash_ + check_some
+    return base58.b58encode(result).decode()
+    # TODO-> update project with crypto_tools repo
+
+
 if __name__ == '__main__':
-    e = random_entrophy()
-    m = mnemonic_from_entrophy(e)
-    s = seed_from_mnemonic(m)
-    master_private_key, chain_code = master_private_key_chain_from_seed(s)
-    hd = get_hd_from_private_key_chain(master_private_key, chain_code, False)
-    print('entrophy', e)
-    print('mnemonic', m)
-    print('seed', s)
-    print('master_private_key', master_private_key)
-    print('chain_code', chain_code)
-    print('HD', hd)
-    print('NORMAL 5', normal_child_private_key_from_data_key(master_private_key + '5', chain_code))
-    print('done')
+    # e = random_entrophy()
+    # m = mnemonic_from_entrophy(e)
+    # s = seed_from_mnemonic(m)
+    # master_private_key, chain_code = master_private_key_chain_from_seed(s)
+    # hd = get_hd_from_private_key_chain(master_private_key, chain_code, False)
+    # print('entrophy', e)
+    # print('mnemonic', m)
+    # print('seed', s)
+    # print('master_private_key', master_private_key)
+    # print('chain_code', chain_code)
+    # print('HD', hd)
+    # print('NORMAL 5', normal_child_private_key_from_data_key(master_private_key + '5', chain_code))
+    # print('done')
+    print(p2pkh_from_public_key('mvm74FACaagz94rjWbNmW2EmhJdmEGcxpa'))

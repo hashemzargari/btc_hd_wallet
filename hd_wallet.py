@@ -57,6 +57,28 @@ class HDWallet:
         child_master_private_key, child_chain = normal_child_private_key_from_data_key(data, key)
         return HDWallet(master_private_key=child_master_private_key, chain=child_chain)
 
+    def get_wallet_for_derivation_path(self, derivation_path: str):
+        m, purpose, coin_type, account, change, index = derivation_path.split('/')
+
+        child_ = get_child_from_sub_derivation_path(self, purpose)
+        child_ = get_child_from_sub_derivation_path(child_, coin_type)
+        child_ = get_child_from_sub_derivation_path(child_, account)
+        child_ = get_child_from_sub_derivation_path(child_, change)
+        child_ = get_child_from_sub_derivation_path(child_, index)
+
+        address = None
+
+        # TODO
+
+        if '44' in purpose:  # BIP 44, P2PKH
+            pass
+        elif '49' in purpose:  # BIP 49
+            pass
+        elif '84' in purpose:  # BIP 84
+            pass
+        else:
+            raise ValueError('please use standard purpose. ex: BIP44, BIP49, BIP84')
+
 
 if __name__ == '__main__':
     hd = HDWallet()
